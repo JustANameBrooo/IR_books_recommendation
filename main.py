@@ -1,6 +1,10 @@
 from numpy import NaN
 import pandas as pd
 import indexing
+import os, glob, re, sys, random, unicodedata, collections
+import re
+from nltk.tokenize import sent_tokenize , word_tokenize
+from nltk.corpus import stopwords
 
 df = pd.read_csv(r'.\booklist.csv')
 # arr = df.values
@@ -13,6 +17,24 @@ wanted_cols = ['bookId','title','series','author','rating','description','genres
 #TODO: filter out our wanted cols, create our index and save it to a file(?)
 filtered_df = df[wanted_cols].head(5)
 # print(filtered_df.head(5))
+
+WORD_MIN_LENGTH = 2
+STOP_WORDS = stopwords.words('english')
+
+def tokenize_text(text):
+    # Strip accents/punctuations
+    nfkd = unicodedata.normalize('NFKD', text)
+    text = u"".join([c for c in nfkd if not unicodedata.combining(c)])
+    text=  re.sub('[^a-zA-Z0-9\d\'\s \\\']', '', text) 
+
+    # tokenize, lowercase/remove newlines, remove stop words and words with less than 2 chars.
+    words = text.lower().split()
+    text = re.sub(re.compile('\n'),' ',text)
+    words = word_tokenize(text)
+    words = [word.lower() for word in words]
+    words = [word for word in words if word not in STOP_WORDS and len(word) >= WORD_MIN_LENGTH]
+    return words
+
 
 def clean_lists(w):
     return len(w)>2
@@ -35,6 +57,19 @@ def clean_col(col):
 
 filtered_df = filtered_df.apply(clean_col)
 print(filtered_df)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # for i in list(range(5)):
